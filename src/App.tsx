@@ -14,21 +14,20 @@ type ChatMessage = {
   content: string
 }
 
-const BACKEND_BASE_URL = 'YOUR_BACKEND_URL_HERE'
-
 function App() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
     {
       role: 'assistant',
       content:
-        "Welcome to MediCare OS Command Center. I'm Erin—your AI System Administrator. How can I help right now?",
+        'Welcome to MediCare OS. I am Erin, your AI System Administrator. How can I assist you today?',
     },
   ])
-  const [isLoading, setIsLoading] = useState(false)
-  const [input, setInput] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+  const [inputValue, setInputValue] = useState('')
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const typingTimeoutRef = useRef<number | null>(null)
 
   const navItems = useMemo(
     () => [
@@ -45,7 +44,15 @@ function App() {
       top: scrollRef.current.scrollHeight,
       behavior: 'smooth',
     })
-  }, [chatHistory.length, isLoading])
+  }, [chatHistory.length, isTyping])
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        window.clearTimeout(typingTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useLayoutEffect(() => {
     const el = inputRef.current
@@ -54,67 +61,32 @@ function App() {
     el.style.height = 'auto'
     const maxPx = 144
     el.style.height = `${Math.min(el.scrollHeight, maxPx)}px`
-  }, [input])
+  }, [inputValue])
 
-  async function sendMessage() {
-    const message = input.trim()
-    if (!message || isLoading) return
+  function handleSend() {
+    const message = inputValue.trim()
+    if (!message || isTyping) return
 
-    setInput('')
-    setIsLoading(true)
+    setChatHistory((prev) => [...prev, { role: 'user', content: message }])
+    setInputValue('')
+    setIsTyping(true)
 
-    setChatHistory((prev) => {
-      const nextHistory: ChatMessage[] = [
+    if (typingTimeoutRef.current) {
+      window.clearTimeout(typingTimeoutRef.current)
+    }
+
+    typingTimeoutRef.current = window.setTimeout(() => {
+      setIsTyping(false)
+      setChatHistory((prev) => [
         ...prev,
-        { role: 'user', content: message },
-      ]
-
-      void (async () => {
-        try {
-          const res = await fetch(`${BACKEND_BASE_URL}/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message,
-              history: nextHistory,
-            }),
-          })
-
-          if (!res.ok) {
-            const text = await res.text()
-            throw new Error(
-              `Request failed (${res.status}): ${text || res.statusText}`,
-            )
-          }
-
-          const data = (await res.json()) as { reply?: string }
-          const reply = (data.reply ?? '').toString().trim()
-
-          setChatHistory((prev2) => [
-            ...prev2,
-            {
-              role: 'assistant',
-              content:
-                reply ||
-                "I didn't receive a reply payload. Please check your backend response shape: {\"reply\":\"...\"}.",
-            },
-          ])
-        } catch (e) {
-          const msg = e instanceof Error ? e.message : 'Unknown error'
-          setChatHistory((prev2) => [
-            ...prev2,
-            {
-              role: 'assistant',
-              content: `I hit an error contacting the command center backend: ${msg}`,
-            },
-          ])
-        } finally {
-          setIsLoading(false)
-        }
-      })()
-
-      return nextHistory
-    })
+        {
+          role: 'assistant',
+          content:
+            'This is a mock response from Erin. The API is not connected yet, but the UI is ready!',
+        },
+      ])
+      typingTimeoutRef.current = null
+    }, 2000)
   }
 
   return (
@@ -233,8 +205,19 @@ function App() {
             </div>
           </header>
 
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8">
+          <div
+            className={[
+              'flex min-h-0 flex-1 flex-col',
+              'bg-slate-50',
+              'bg-[radial-gradient(#cbd5e1_1px,transparent_1px)]',
+              '[background-size:24px_24px]',
+              '[background-position:0_0]',
+            ].join(' ')}
+          >
+            <div
+              ref={scrollRef}
+              className="min-h-0 flex-1 overflow-y-auto bg-transparent px-4 py-6 md:px-8"
+            >
               <div className="mx-auto w-full max-w-4xl space-y-4">
                 {chatHistory.map((m, idx) => {
                   const isUser = m.role === 'user'
@@ -256,13 +239,25 @@ function App() {
                     </div>
                   )
                 })}
+
+                {isTyping ? (
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] rounded-2xl bg-white px-5 py-4 text-sm leading-relaxed text-slate-800 shadow-sm ring-1 ring-slate-200/70 md:max-w-[70%] md:text-[15px]">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse [animation-delay:-200ms]" />
+                        <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse [animation-delay:-100ms]" />
+                        <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse" />
+                      </span>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
 
-            <div className="border-t border-slate-200 bg-white">
+            <div className="bg-transparent">
               <div className="mx-auto w-full max-w-4xl px-4 py-4 md:px-8">
                 <div className="pb-2 text-xs text-slate-500">
-                  {isLoading ? (
+                  {isTyping ? (
                     <span className="inline-flex items-center gap-2">
                       <span className="inline-flex">
                         <span className="mr-1 inline-block size-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-200ms]" />
@@ -280,7 +275,7 @@ function App() {
                   className="flex items-end gap-3"
                   onSubmit={(e) => {
                     e.preventDefault()
-                    void sendMessage()
+                    handleSend()
                   }}
                 >
                   <div className="flex-1">
@@ -291,18 +286,18 @@ function App() {
                       <textarea
                         ref={inputRef}
                         id="chat-input"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault()
-                            void sendMessage()
+                            handleSend()
                           }
                         }}
                         rows={1}
                         placeholder="Message Erin…"
                         className="max-h-36 w-full resize-none overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-28 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/15 disabled:bg-slate-50"
-                        disabled={isLoading}
+                        disabled={isTyping}
                       />
                       <div className="pointer-events-none absolute bottom-3 right-4 hidden text-[11px] text-slate-400 sm:block">
                         Enter • Shift+Enter
@@ -313,7 +308,7 @@ function App() {
                   <button
                     type="submit"
                     className="inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400/30 disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={isLoading || !input.trim()}
+                    disabled={isTyping || !inputValue.trim()}
                   >
                     <span className="hidden sm:inline">Send</span>
                     <Send className="size-4" />
