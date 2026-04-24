@@ -1,8 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   CalendarClock,
-  ChevronLeft,
-  ChevronRight,
   LayoutDashboard,
   Send,
   Settings,
@@ -131,38 +129,52 @@ function App() {
         >
           <div
             className={[
-              'flex items-center border-b border-slate-800 py-5',
-              isSidebarCollapsed ? 'justify-center px-3' : 'gap-3 px-6',
+              'border-b border-slate-800 py-5',
+              isSidebarCollapsed ? 'px-3' : 'px-6',
             ].join(' ')}
           >
-            <div className="grid size-10 place-items-center rounded-xl bg-teal-500/15 ring-1 ring-teal-400/20">
-              <div className="size-2.5 rounded-full bg-teal-400" />
-            </div>
-            {!isSidebarCollapsed && (
-              <div className="leading-tight">
-                <div className="text-sm font-semibold tracking-wide text-slate-50">
-                  MediCare OS
-                </div>
-                <div className="text-xs text-slate-400">Command Center</div>
-              </div>
-            )}
-
-            <button
-              type="button"
-              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            <div
               className={[
-                'ml-auto inline-flex size-9 items-center justify-center rounded-xl text-slate-200 transition',
-                'hover:bg-slate-800/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60',
-                isSidebarCollapsed ? 'absolute left-[76px] top-5 ml-0 bg-slate-900/95 ring-1 ring-slate-700/60 shadow-sm' : '',
+                'flex items-center',
+                isSidebarCollapsed ? 'justify-center' : 'justify-between',
               ].join(' ')}
-              onClick={() => setIsSidebarCollapsed((v) => !v)}
             >
-              {isSidebarCollapsed ? (
-                <ChevronRight className="size-5" />
-              ) : (
-                <ChevronLeft className="size-5" />
-              )}
-            </button>
+              {!isSidebarCollapsed ? (
+                <div className="flex items-center gap-3">
+                  <div className="grid size-10 place-items-center rounded-xl bg-teal-500/15 ring-1 ring-teal-400/20">
+                    <div className="size-2.5 rounded-full bg-teal-400" />
+                  </div>
+                  <div className="leading-tight">
+                    <div className="text-sm font-semibold tracking-wide text-slate-50">
+                      MediCare OS
+                    </div>
+                    <div className="text-xs text-slate-400">Command Center</div>
+                  </div>
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                className="inline-flex size-9 items-center justify-center rounded-xl text-slate-300 transition hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60"
+                onClick={() => setIsSidebarCollapsed((v) => !v)}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 6h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 18h16" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <nav className={isSidebarCollapsed ? 'px-2 py-4' : 'px-3 py-4'}>
