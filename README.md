@@ -1,73 +1,26 @@
-# React + TypeScript + Vite
+# 🏥 MediCare OS | AI Command Center
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**MediCare OS** is a high-performance, AI-driven dashboard designed to streamline hospital operations. Built for the [Hackathon Name] 2026, it serves as a central hub for managing patients, scheduling appointments, and interacting with specialized AI agents to optimize clinical workflows.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Features
 
-## React Compiler
+* **AI System Administrator (Erin):** A real-time chat interface to assist with doctor lookups, specialty searches, and scheduling.
+* **Collapsible Command Center:** A sleek, dark-themed sidebar for maximum focus and screen real estate.
+* **System Health Monitor:** Live API status tracking to ensure zero downtime in critical environments.
+* **Clinical UI/UX:** A minimalist, distraction-free dot-grid interface designed for medical professionals.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+* **Frontend:** React.js, Tailwind CSS
+* **Icons:** Lucide React
+* **State Management:** React Hooks (useState, useEffect)
+* **Backend (In Progress):** Python (FastAPI), Google Cloud Run
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📦 Installation & Setup
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/8bit-gaurav/Hackathon-Frontend.git](https://github.com/8bit-gaurav/Hackathon-Frontend.git)
+   cd Hackathon-Frontend
