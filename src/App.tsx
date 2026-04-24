@@ -27,6 +27,7 @@ function App() {
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isApiOnline] = useState(false)
   const typingTimeoutRef = useRef<number | null>(null)
 
   const navItems = useMemo(
@@ -112,15 +113,12 @@ function App() {
               ].join(' ')}
             >
               {!isSidebarCollapsed ? (
-                <div className="flex items-center gap-3">
+                <div className="flex min-h-10 items-center gap-3">
                   <div className="grid size-10 place-items-center rounded-xl bg-teal-500/15 ring-1 ring-teal-400/20">
                     <div className="size-2.5 rounded-full bg-teal-400" />
                   </div>
-                  <div className="leading-tight">
-                    <div className="text-sm font-semibold tracking-wide text-slate-50">
-                      MediCare OS
-                    </div>
-                    
+                  <div className="text-sm font-semibold leading-none tracking-wide text-slate-50">
+                    MediCare OS
                   </div>
                 </div>
               ) : null}
@@ -128,7 +126,7 @@ function App() {
               <button
                 type="button"
                 aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                className="inline-flex size-9 items-center justify-center rounded-xl text-slate-300 transition hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60"
+                className="inline-flex size-10 items-center justify-center rounded-xl text-slate-300 transition hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60"
                 onClick={() => setIsSidebarCollapsed((v) => !v)}
               >
                 <svg
@@ -174,14 +172,31 @@ function App() {
             </div>
           </nav>
 
-          {!isSidebarCollapsed && (
-            <div className="mt-auto border-t border-slate-800 px-6 py-4">
-              <div className="text-xs text-slate-400">System</div>
-              <div className="mt-1 text-sm font-medium text-slate-100">
-                Hospital Ops • v1.0
+          <div className={isSidebarCollapsed ? 'mt-auto px-2 pb-4' : 'mt-auto px-3 pb-4'}>
+            <div
+              className={[
+                'rounded-xl border border-slate-800 bg-slate-900/40',
+                isSidebarCollapsed ? 'px-3 py-3' : 'px-3 py-2.5',
+              ].join(' ')}
+              title={isSidebarCollapsed ? (isApiOnline ? 'API Status: Online' : 'API Status: Disconnected') : undefined}
+            >
+              <div className={isSidebarCollapsed ? 'flex items-center justify-center' : 'flex items-center gap-2'}>
+                <div
+                  className={[
+                    'size-2 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]',
+                    isApiOnline
+                      ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.55)]'
+                      : 'bg-red-500 animate-pulse',
+                  ].join(' ')}
+                />
+                {!isSidebarCollapsed && (
+                  <span className="text-xs text-slate-500">
+                    API Status: {isApiOnline ? 'Online' : 'Disconnected'}
+                  </span>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col">
