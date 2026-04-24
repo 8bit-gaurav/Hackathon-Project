@@ -120,7 +120,7 @@ function App() {
                     <div className="text-sm font-semibold tracking-wide text-slate-50">
                       MediCare OS
                     </div>
-                    <div className="text-xs text-slate-400">Command Center</div>
+                    
                   </div>
                 </div>
               ) : null}
