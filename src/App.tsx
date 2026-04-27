@@ -511,12 +511,9 @@ function App() {
                         }}
                         rows={1}
                         placeholder="Message Erin…"
-                        className="max-h-36 w-full resize-none overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-28 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/15 disabled:bg-slate-50"
+                        className="max-h-36 w-full resize-none overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/15 disabled:bg-slate-50"
                         disabled={isTyping}
                       />
-                      <div className="pointer-events-none absolute bottom-3 right-4 hidden text-[11px] text-slate-400 sm:block">
-                        Enter • Shift+Enter
-                      </div>
                     </div>
                   </div>
 
