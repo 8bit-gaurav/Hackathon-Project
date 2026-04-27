@@ -1,9 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
+  Menu,
   MessageSquare,
   Plus,
   Send,
   Trash2,
+  X,
 } from 'lucide-react'
 
 type ChatRole = 'user' | 'assistant'
@@ -70,6 +72,7 @@ function App() {
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isApiOnline, setIsApiOnline] = useState(false)
   const typingTimeoutRef = useRef<number | null>(null)
 
@@ -217,10 +220,21 @@ function App() {
   return (
     <div className="h-full bg-gray-50 text-slate-900">
       <div className="flex h-full">
+        {isMobileMenuOpen && (
+          <button
+            type="button"
+            aria-label="Close sidebar"
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
         <aside
           className={[
-            'hidden shrink-0 bg-slate-900 text-slate-100 md:flex md:flex-col',
-            'transition-[width] duration-300 ease-in-out',
+            'fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col bg-slate-900 text-slate-100',
+            'transform transition-transform duration-300 md:relative md:translate-x-0',
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
+            'transition-[width] ease-in-out',
             isSidebarCollapsed ? 'w-20' : 'w-72',
           ].join(' ')}
         >
@@ -236,6 +250,15 @@ function App() {
                 isSidebarCollapsed ? 'justify-center' : 'justify-between',
               ].join(' ')}
             >
+              <button
+                type="button"
+                aria-label="Close mobile menu"
+                className="inline-flex size-10 items-center justify-center rounded-xl text-slate-300 transition hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60 md:hidden"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <X className="size-5" />
+              </button>
+
               {!isSidebarCollapsed ? (
                 <div className="flex min-h-10 items-center gap-3">
                   <div className="grid size-10 place-items-center rounded-xl bg-teal-500/15 ring-1 ring-teal-400/20">
@@ -250,7 +273,7 @@ function App() {
               <button
                 type="button"
                 aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                className="inline-flex size-10 items-center justify-center rounded-xl text-slate-300 transition hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60"
+                className="hidden size-10 items-center justify-center rounded-xl text-slate-300 transition hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60 md:inline-flex"
                 onClick={() => setIsSidebarCollapsed((v) => !v)}
               >
                 <svg
@@ -359,7 +382,15 @@ function App() {
         <main className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
             <div className="flex items-center justify-between px-4 py-4 md:px-8">
-              <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-3">
+                <button
+                  type="button"
+                  aria-label="Open sidebar menu"
+                  className="inline-flex size-9 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60 md:hidden"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                >
+                  <Menu className="size-5" />
+                </button>
                 <div className="truncate text-base font-semibold text-slate-900">
                   Erin - AI Healthcare Assistant
                 </div>
