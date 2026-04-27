@@ -3,6 +3,7 @@ import {
   MessageSquare,
   Plus,
   Send,
+  Trash2,
 } from 'lucide-react'
 
 type ChatRole = 'user' | 'assistant'
@@ -151,6 +152,17 @@ function App() {
     window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, newSession.id)
   }
 
+  function handleDeleteSession(
+    e: React.MouseEvent<HTMLButtonElement>,
+    sessionId: string,
+  ) {
+    e.stopPropagation()
+    setSessions((prev) => prev.filter((session) => session.id !== sessionId))
+    if (activeSessionId === sessionId) {
+      setActiveSessionId('')
+    }
+  }
+
   async function handleSend() {
     const message = inputValue.trim()
     if (!message || isTyping || !activeSession) return
@@ -282,23 +294,37 @@ function App() {
 
             <div className="space-y-1">
               {sessions.map((session) => (
-                <button
-                  key={session.id}
-                  type="button"
-                  title={isSidebarCollapsed ? session.title : undefined}
-                  onClick={() => setActiveSessionId(session.id)}
-                  className={[
-                    'flex w-full items-center rounded-xl py-2.5 text-left text-sm text-slate-300 transition',
-                    'hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60',
-                    activeSessionId === session.id ? 'bg-slate-800/80 text-white' : '',
-                    isSidebarCollapsed ? 'justify-center px-2' : 'gap-2.5 px-3',
-                  ].join(' ')}
-                >
-                  <MessageSquare className="size-4 shrink-0 text-slate-400" />
+                <div key={session.id} className="group relative">
+                  <button
+                    type="button"
+                    title={isSidebarCollapsed ? session.title : undefined}
+                    onClick={() => setActiveSessionId(session.id)}
+                    className={[
+                      'flex w-full items-center rounded-xl py-2.5 text-left text-sm text-slate-300 transition',
+                      'hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60',
+                      activeSessionId === session.id ? 'bg-slate-800/80 text-white' : '',
+                      isSidebarCollapsed
+                        ? 'justify-center px-2'
+                        : 'gap-2.5 px-3 pr-10',
+                    ].join(' ')}
+                  >
+                    <MessageSquare className="size-4 shrink-0 text-slate-400" />
+                    {!isSidebarCollapsed && (
+                      <span className="truncate text-sm">{session.title}</span>
+                    )}
+                  </button>
+
                   {!isSidebarCollapsed && (
-                    <span className="truncate text-sm">{session.title}</span>
+                    <button
+                      type="button"
+                      aria-label={`Delete ${session.title}`}
+                      onClick={(e) => handleDeleteSession(e, session.id)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 opacity-0 transition hover:bg-slate-700 hover:text-red-300 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 group-hover:opacity-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   )}
-                </button>
+                </div>
               ))}
             </div>
           </section>
