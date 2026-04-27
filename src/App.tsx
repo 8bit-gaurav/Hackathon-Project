@@ -20,6 +20,7 @@ type ChatSession = {
 
 const SESSIONS_STORAGE_KEY = 'chatSessions'
 const ACTIVE_SESSION_ID_STORAGE_KEY = 'activeSessionId'
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 function loadStoredSessions(): ChatSession[] {
   const raw = window.localStorage.getItem(SESSIONS_STORAGE_KEY)
@@ -163,7 +164,7 @@ function App() {
     setIsTyping(true)
 
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
