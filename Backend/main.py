@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict
-from agent import process_request
+from Backend.agent import process_request
 
 app = FastAPI()
 
