@@ -1,10 +1,8 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
-  CalendarClock,
-  LayoutDashboard,
+  MessageSquare,
+  Plus,
   Send,
-  Settings,
-  UserRound,
 } from 'lucide-react'
 
 type ChatRole = 'user' | 'assistant'
@@ -14,41 +12,50 @@ type ChatMessage = {
   content: string
 }
 
+type ChatSession = {
+  id: string
+  title: string
+  messages: ChatMessage[]
+}
+
+function makeSessionId() {
+  return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+function makeSessionTitle(message: string) {
+  const words = message.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return 'New Chat'
+  const maxWords = 5
+  const title = words.slice(0, maxWords).join(' ')
+  return words.length > maxWords ? `${title}...` : title
+}
+
 function App() {
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      content:
-        'Welcome to MediCare OS. I am Erin, your AI System Administrator. How can I assist you today?',
-    },
-  ])
+  const initialSession: ChatSession = {
+    id: makeSessionId(),
+    title: 'New Chat',
+    messages: [],
+  }
+  const [sessions, setSessions] = useState<ChatSession[]>([initialSession])
+  const [activeSessionId, setActiveSessionId] = useState(initialSession.id)
   const [isTyping, setIsTyping] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  
-  // Notice I added setIsApiOnline here!
-  const [isApiOnline, setIsApiOnline] = useState(false) 
-  
+  const [isApiOnline, setIsApiOnline] = useState(false)
   const typingTimeoutRef = useRef<number | null>(null)
 
-  const navItems = useMemo(
-    () => [
-      { label: 'Dashboard', icon: LayoutDashboard },
-      { label: 'Patients', icon: UserRound },
-      { label: 'Appointments', icon: CalendarClock },
-      { label: 'Settings', icon: Settings },
-    ],
-    [],
-  )
+  const activeSession =
+    sessions.find((session) => session.id === activeSessionId) ?? sessions[0]
+  const activeMessages = activeSession?.messages ?? []
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: 'smooth',
     })
-  }, [chatHistory.length, isTyping])
+  }, [activeMessages.length, isTyping, activeSessionId])
 
   useEffect(() => {
     return () => {
@@ -67,44 +74,90 @@ function App() {
     el.style.height = `${Math.min(el.scrollHeight, maxPx)}px`
   }, [inputValue])
 
-  // --- THE NEW REAL API BRIDGE ---
+  function updateSessionMessages(
+    sessionId: string,
+    updater: (messages: ChatMessage[]) => ChatMessage[],
+  ) {
+    setSessions((prev) =>
+      prev.map((session) => {
+        if (session.id !== sessionId) return session
+        const nextMessages = updater(session.messages)
+        const firstUserMessage = nextMessages.find((m) => m.role === 'user')
+        return {
+          ...session,
+          messages: nextMessages,
+          title: firstUserMessage
+            ? makeSessionTitle(firstUserMessage.content)
+            : 'New Chat',
+        }
+      }),
+    )
+  }
+
+  function handleNewChat() {
+    const newSession: ChatSession = {
+      id: makeSessionId(),
+      title: 'New Chat',
+      messages: [],
+    }
+    if (typingTimeoutRef.current) {
+      window.clearTimeout(typingTimeoutRef.current)
+      typingTimeoutRef.current = null
+    }
+    setIsTyping(false)
+    setInputValue('')
+    setSessions((prev) => [newSession, ...prev])
+    setActiveSessionId(newSession.id)
+  }
+
   async function handleSend() {
     const message = inputValue.trim()
-    if (!message || isTyping) return
+    if (!message || isTyping || !activeSession) return
+    const sessionId = activeSession.id
 
-    setChatHistory((prev) => [...prev, { role: 'user', content: message }])
+    updateSessionMessages(sessionId, (messages) => [
+      ...messages,
+      { role: 'user', content: message },
+    ])
     setInputValue('')
     setIsTyping(true)
 
     try {
-      // 1. Send the message to your local Python server
-      const response = await fetch("http://localhost:8000/chat", {
-        method: "POST",
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: message }), 
-      });
+        body: JSON.stringify({ message }),
+      })
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error('Network response was not ok')
       }
 
-      const data = await response.json();
-      
-      // 2. Turn the sidebar status dot GREEN because we connected!
-      setIsApiOnline(true); 
+      const data = (await response.json()) as { reply?: string }
+      setIsApiOnline(true)
 
-      // 3. Add Erin's real AI response to the chat history
-      setChatHistory((prev) => [...prev, { role: 'assistant', content: data.reply }]);
-      
+      updateSessionMessages(sessionId, (messages) => [
+        ...messages,
+        {
+          role: 'assistant',
+          content: data.reply ?? 'No response received from backend.',
+        },
+      ])
     } catch (error) {
-      console.error("Failed to fetch API:", error);
-      // Turn the status dot RED if it fails
-      setIsApiOnline(false); 
-      setChatHistory((prev) => [...prev, { role: 'assistant', content: "⚠️ Connection to hospital server failed. Please check if the Python backend is running." }]);
+      console.error('Failed to fetch API:', error)
+      setIsApiOnline(false)
+      updateSessionMessages(sessionId, (messages) => [
+        ...messages,
+        {
+          role: 'assistant',
+          content:
+            '⚠️ Connection to hospital server failed. Please check if the Python backend is running.',
+        },
+      ])
     } finally {
-      setIsTyping(false); 
+      setIsTyping(false)
     }
   }
 
@@ -165,30 +218,49 @@ function App() {
             </div>
           </div>
 
-          <nav className={isSidebarCollapsed ? 'px-2 py-4' : 'px-3 py-4'}>
+          <section className={isSidebarCollapsed ? 'px-2 py-4' : 'px-3 py-4'}>
+            <button
+              type="button"
+              title={isSidebarCollapsed ? 'New Chat' : undefined}
+              onClick={handleNewChat}
+              className={[
+                'mb-4 inline-flex w-full items-center rounded-xl bg-teal-600 py-2.5 text-sm font-medium text-white transition',
+                'hover:bg-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/70',
+                isSidebarCollapsed ? 'justify-center px-2' : 'gap-2.5 px-3',
+              ].join(' ')}
+            >
+              <Plus className="size-4 shrink-0" />
+              {!isSidebarCollapsed && <span>New Chat</span>}
+            </button>
+
+            {!isSidebarCollapsed && (
+              <div className="px-3 pb-2 text-xs font-medium text-slate-500">
+                Recent Sessions
+              </div>
+            )}
+
             <div className="space-y-1">
-              {navItems.map((item) => {
-                const Icon = item.icon
-                return (
-                  <button
-                    key={item.label}
-                    type="button"
-                    title={isSidebarCollapsed ? item.label : undefined}
-                    className={[
-                      'flex w-full items-center rounded-xl py-2.5 text-left text-sm text-slate-200 transition',
-                      'hover:bg-slate-800/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60',
-                      isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
-                    ].join(' ')}
-                  >
-                    <Icon className="size-5 text-slate-300" />
-                    {!isSidebarCollapsed && (
-                      <span className="font-medium">{item.label}</span>
-                    )}
-                  </button>
-                )
-              })}
+              {sessions.map((session) => (
+                <button
+                  key={session.id}
+                  type="button"
+                  title={isSidebarCollapsed ? session.title : undefined}
+                  onClick={() => setActiveSessionId(session.id)}
+                  className={[
+                    'flex w-full items-center rounded-xl py-2.5 text-left text-sm text-slate-300 transition',
+                    'hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400/60',
+                    activeSessionId === session.id ? 'bg-slate-800/80 text-white' : '',
+                    isSidebarCollapsed ? 'justify-center px-2' : 'gap-2.5 px-3',
+                  ].join(' ')}
+                >
+                  <MessageSquare className="size-4 shrink-0 text-slate-400" />
+                  {!isSidebarCollapsed && (
+                    <span className="truncate text-sm">{session.title}</span>
+                  )}
+                </button>
+              ))}
             </div>
-          </nav>
+          </section>
 
           <div className={isSidebarCollapsed ? 'mt-auto px-2 pb-4' : 'mt-auto px-3 pb-4'}>
             <div
@@ -252,7 +324,13 @@ function App() {
               className="min-h-0 flex-1 overflow-y-auto bg-transparent px-4 py-6 md:px-8"
             >
               <div className="mx-auto w-full max-w-4xl space-y-4">
-                {chatHistory.map((m, idx) => {
+                {activeMessages.length === 0 && (
+                  <div className="rounded-2xl bg-white/80 px-5 py-4 text-sm text-slate-500 shadow-sm ring-1 ring-slate-200/70">
+                    Start a new session by sending your first message.
+                  </div>
+                )}
+
+                {activeMessages.map((m, idx) => {
                   const isUser = m.role === 'user'
                   return (
                     <div
