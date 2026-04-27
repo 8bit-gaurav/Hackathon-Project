@@ -18,6 +18,34 @@ type ChatSession = {
   messages: ChatMessage[]
 }
 
+const SESSIONS_STORAGE_KEY = 'chatSessions'
+const ACTIVE_SESSION_ID_STORAGE_KEY = 'activeSessionId'
+
+function loadStoredSessions(): ChatSession[] {
+  const raw = window.localStorage.getItem(SESSIONS_STORAGE_KEY)
+  if (!raw) return []
+
+  try {
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+
+    return parsed.filter((session): session is ChatSession => {
+      return (
+        typeof session?.id === 'string' &&
+        typeof session?.title === 'string' &&
+        Array.isArray(session?.messages)
+      )
+    })
+  } catch (error) {
+    console.error('Failed to parse stored sessions:', error)
+    return []
+  }
+}
+
+function loadStoredActiveSessionId(): string {
+  return window.localStorage.getItem(ACTIVE_SESSION_ID_STORAGE_KEY) ?? ''
+}
+
 function makeSessionId() {
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
@@ -31,13 +59,10 @@ function makeSessionTitle(message: string) {
 }
 
 function App() {
-  const initialSession: ChatSession = {
-    id: makeSessionId(),
-    title: 'New Chat',
-    messages: [],
-  }
-  const [sessions, setSessions] = useState<ChatSession[]>([initialSession])
-  const [activeSessionId, setActiveSessionId] = useState(initialSession.id)
+  const [sessions, setSessions] = useState<ChatSession[]>(() => loadStoredSessions())
+  const [activeSessionId, setActiveSessionId] = useState<string>(() =>
+    loadStoredActiveSessionId(),
+  )
   const [isTyping, setIsTyping] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const scrollRef = useRef<HTMLDivElement | null>(null)
@@ -56,6 +81,18 @@ function App() {
       behavior: 'smooth',
     })
   }, [activeMessages.length, isTyping, activeSessionId])
+
+  useEffect(() => {
+    window.localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions))
+    window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, activeSessionId)
+  }, [sessions, activeSessionId])
+
+  useEffect(() => {
+    if (sessions.length === 0) return
+    if (!activeSessionId || !sessions.some((session) => session.id === activeSessionId)) {
+      setActiveSessionId(sessions[0].id)
+    }
+  }, [sessions, activeSessionId])
 
   useEffect(() => {
     return () => {
@@ -106,8 +143,11 @@ function App() {
     }
     setIsTyping(false)
     setInputValue('')
-    setSessions((prev) => [newSession, ...prev])
+    const nextSessions = [newSession, ...sessions]
+    setSessions(nextSessions)
     setActiveSessionId(newSession.id)
+    window.localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(nextSessions))
+    window.localStorage.setItem(ACTIVE_SESSION_ID_STORAGE_KEY, newSession.id)
   }
 
   async function handleSend() {
@@ -189,7 +229,7 @@ function App() {
                     <div className="size-2.5 rounded-full bg-teal-400" />
                   </div>
                   <div className="text-sm font-semibold leading-none tracking-wide text-slate-50">
-                    MediCare OS
+                    AI Healthcare
                   </div>
                 </div>
               ) : null}
@@ -294,7 +334,7 @@ function App() {
             <div className="flex items-center justify-between px-4 py-4 md:px-8">
               <div className="min-w-0">
                 <div className="truncate text-base font-semibold text-slate-900">
-                  Erin - AI System Administrator
+                  Erin - AI Healthcare Assistant
                 </div>
                 <div className="mt-1 flex items-center gap-2 text-sm text-slate-500">
                   <span className="relative inline-flex size-2">
@@ -303,9 +343,6 @@ function App() {
                   </span>
                   <span className="text-emerald-700">Online</span>
                 </div>
-              </div>
-              <div className="hidden text-sm text-slate-500 md:block">
-                Secure clinical operations assistant
               </div>
             </div>
           </header>

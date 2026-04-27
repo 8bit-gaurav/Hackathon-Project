@@ -1,5 +1,6 @@
 import time
 import json
+import os
 from datetime import datetime
 from google.adk import Agent
 from google.genai import types
@@ -389,3 +390,10 @@ async def process_request(user_input, history):
             return "⚠️ System busy, retrying..."
             
         return f"Agent Error: {str(e)}"
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
