@@ -168,8 +168,19 @@ function App() {
 
   async function handleSend() {
     const message = inputValue.trim()
-    if (!message || isTyping || !activeSession) return
-    const sessionId = activeSession.id
+    if (!message || isTyping) return
+
+    let sessionId = activeSession?.id
+    if (!sessionId) {
+      const newSession: ChatSession = {
+        id: makeSessionId(),
+        title: makeSessionTitle(message),
+        messages: [],
+      }
+      sessionId = newSession.id
+      setSessions((prev) => [newSession, ...prev])
+      setActiveSessionId(sessionId)
+    }
 
     updateSessionMessages(sessionId, (messages) => [
       ...messages,
