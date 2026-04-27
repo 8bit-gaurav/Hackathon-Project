@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
+  HeartPulse,
   Menu,
   MessageSquare,
   Plus,
@@ -272,11 +273,11 @@ function App() {
 
               {!isSidebarCollapsed ? (
                 <div className="flex min-h-10 items-center gap-3">
-                  <div className="grid size-10 place-items-center rounded-xl bg-teal-500/15 ring-1 ring-teal-400/20">
-                    <div className="size-2.5 rounded-full bg-teal-400" />
+                  <div className="grid size-10 place-items-center rounded-xl bg-emerald-500/20 ring-1 ring-emerald-400/25">
+                    <HeartPulse className="size-5 text-emerald-400" />
                   </div>
                   <div className="text-sm font-semibold leading-none tracking-wide text-slate-50">
-                    AI Healthcare
+                    Erin OS
                   </div>
                 </div>
               ) : null}
