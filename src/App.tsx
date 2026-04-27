@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
-  HeartPulse,
   Menu,
   MessageSquare,
   Plus,
@@ -273,11 +272,9 @@ function App() {
 
               {!isSidebarCollapsed ? (
                 <div className="flex min-h-10 items-center gap-3">
-                  <div className="grid size-10 place-items-center rounded-xl bg-emerald-500/20 ring-1 ring-emerald-400/25">
-                    <HeartPulse className="size-5 text-emerald-400" />
-                  </div>
+                  <img src="/logo.png" alt="MediCare OS Logo" className="w-8 h-8 object-contain shrink-0" />
                   <div className="text-sm font-semibold leading-none tracking-wide text-slate-50">
-                    Erin OS
+                    MediCare OS
                   </div>
                 </div>
               ) : null}
