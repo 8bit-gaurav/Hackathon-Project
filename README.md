@@ -23,4 +23,4 @@
 1. **Clone the repository:**
    ```bash
    git clone [https://github.com/8bit-gaurav/Hackathon-Frontend.git](https://github.com/8bit-gaurav/Hackathon-Frontend.git)
-   cd Hackathon-Frontend
+   cd Hackathon-Project
