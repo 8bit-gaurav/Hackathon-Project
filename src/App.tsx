@@ -342,7 +342,7 @@ function App() {
                       type="button"
                       aria-label={`Delete ${session.title}`}
                       onClick={(e) => handleDeleteSession(e, session.id)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 opacity-0 transition hover:bg-slate-700 hover:text-red-300 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 group-hover:opacity-100"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 md:text-inherit opacity-100 md:opacity-0 transition hover:bg-slate-700 hover:text-red-300 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 md:group-hover:opacity-100"
                     >
                       <Trash2 size={16} />
                     </button>
