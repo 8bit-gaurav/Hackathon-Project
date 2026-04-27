@@ -27,7 +27,10 @@ function App() {
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [isApiOnline] = useState(false)
+  
+  // Notice I added setIsApiOnline here!
+  const [isApiOnline, setIsApiOnline] = useState(false) 
+  
   const typingTimeoutRef = useRef<number | null>(null)
 
   const navItems = useMemo(
@@ -64,7 +67,8 @@ function App() {
     el.style.height = `${Math.min(el.scrollHeight, maxPx)}px`
   }, [inputValue])
 
-  function handleSend() {
+  // --- THE NEW REAL API BRIDGE ---
+  async function handleSend() {
     const message = inputValue.trim()
     if (!message || isTyping) return
 
@@ -72,22 +76,36 @@ function App() {
     setInputValue('')
     setIsTyping(true)
 
-    if (typingTimeoutRef.current) {
-      window.clearTimeout(typingTimeoutRef.current)
-    }
-
-    typingTimeoutRef.current = window.setTimeout(() => {
-      setIsTyping(false)
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content:
-            'This is a mock response from Erin. The API is not connected yet, but the UI is ready!',
+    try {
+      // 1. Send the message to your local Python server
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ])
-      typingTimeoutRef.current = null
-    }, 2000)
+        body: JSON.stringify({ message: message }), 
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      
+      // 2. Turn the sidebar status dot GREEN because we connected!
+      setIsApiOnline(true); 
+
+      // 3. Add Erin's real AI response to the chat history
+      setChatHistory((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+      
+    } catch (error) {
+      console.error("Failed to fetch API:", error);
+      // Turn the status dot RED if it fails
+      setIsApiOnline(false); 
+      setChatHistory((prev) => [...prev, { role: 'assistant', content: "⚠️ Connection to hospital server failed. Please check if the Python backend is running." }]);
+    } finally {
+      setIsTyping(false); 
+    }
   }
 
   return (
