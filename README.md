@@ -1,6 +1,6 @@
-# 🏥 MediCare OS | AI Command Center
+# 🏥 Erin AI | AI Command Center
 
-**MediCare OS** is a high-performance, AI-driven dashboard designed to streamline hospital operations. Built for the Gen AI Academy APAC Edition 2026, it serves as a central hub for managing patients, scheduling appointments, and interacting with specialized AI agents to optimize clinical workflows.
+**Erin AI** is a high-performance, AI-driven dashboard designed to streamline hospital operations. Built for the Gen AI Academy APAC Edition 2026, it serves as a central hub for managing patients, scheduling appointments, and interacting with specialized AI agents to optimize clinical workflows.
 
 ---
 

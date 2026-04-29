@@ -63,6 +63,11 @@ function makeSessionTitle(message: string) {
 }
 
 function App() {
+  const suggestedPrompts = [
+    'Find a Specialist',
+    'Check Schedule',
+    'Patient Records',
+  ]
   const [sessions, setSessions] = useState<ChatSession[]>(() => loadStoredSessions())
   const [activeSessionId, setActiveSessionId] = useState<string>(() =>
     loadStoredActiveSessionId(),
@@ -272,9 +277,9 @@ function App() {
 
               {!isSidebarCollapsed ? (
                 <div className="flex min-h-10 items-center gap-3">
-                  <img src="/logo.png" alt="MediCare OS Logo" className="w-8 h-8 object-contain shrink-0" />
+                  <img src="/logo.png" alt="Erin AI Logo" className="w-8 h-8 object-contain shrink-0" />
                   <div className="text-sm font-semibold leading-none tracking-wide text-slate-50">
-                    MediCare OS
+                    Erin AI
                   </div>
                 </div>
               ) : null}
@@ -389,7 +394,7 @@ function App() {
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
+          <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur-md">
             <div className="flex items-center justify-between px-4 py-4 md:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <button
@@ -429,8 +434,30 @@ function App() {
             >
               <div className="mx-auto w-full max-w-4xl space-y-4">
                 {activeMessages.length === 0 && (
-                  <div className="rounded-2xl bg-white/80 px-5 py-4 text-sm text-slate-500 shadow-sm ring-1 ring-slate-200/70">
-                    Start a new session by sending your first message.
+                  <div className="flex min-h-[60vh] items-center justify-center">
+                    <div className="w-full max-w-2xl rounded-3xl border border-slate-200/80 bg-white/85 p-6 shadow-sm backdrop-blur-sm md:p-8">
+                      <div className="text-center">
+                        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                          Welcome to Erin AI
+                        </h2>
+                        <p className="mt-2 text-sm text-slate-600 md:text-base">
+                          How can Erin assist you today?
+                        </p>
+                      </div>
+
+                      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        {suggestedPrompts.map((prompt) => (
+                          <button
+                            key={prompt}
+                            type="button"
+                            onClick={() => setInputValue(prompt)}
+                            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-emerald-50/50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -441,36 +468,45 @@ function App() {
                       key={`${idx}-${m.role}`}
                       className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div
-                        className={[
-                          'max-w-[85%] rounded-2xl px-5 py-4 text-sm leading-relaxed md:max-w-[70%] md:text-[15px]',
-                          isUser
-                            ? 'bg-teal-600 text-white shadow-sm'
-                            : 'bg-white text-slate-800 shadow-sm ring-1 ring-slate-200/70',
-                        ].join(' ')}
-                      >
-                        {m.content}
-                      </div>
+                      {isUser ? (
+                        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-emerald-600 px-5 py-4 text-sm leading-relaxed text-white shadow-sm md:text-[15px]">
+                          {m.content}
+                        </div>
+                      ) : (
+                        <div className="flex max-w-[80%] items-start gap-2.5">
+                          <div className="grid size-8 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                            <img src="/logo.png" alt="Erin avatar" className="size-4 object-contain" />
+                          </div>
+                          <div className="rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-5 py-4 text-sm leading-relaxed text-slate-800 shadow-sm md:text-[15px]">
+                            {m.content}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
 
                 {isTyping ? (
                   <div className="flex justify-start">
-                    <div className="max-w-[85%] rounded-2xl bg-white px-5 py-4 text-sm leading-relaxed text-slate-800 shadow-sm ring-1 ring-slate-200/70 md:max-w-[70%] md:text-[15px]">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse [animation-delay:-200ms]" />
-                        <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse [animation-delay:-100ms]" />
-                        <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse" />
-                      </span>
+                    <div className="flex max-w-[80%] items-start gap-2.5">
+                      <div className="grid size-8 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                        <img src="/logo.png" alt="Erin avatar" className="size-4 object-contain" />
+                      </div>
+                      <div className="rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-5 py-4 text-sm leading-relaxed text-slate-800 shadow-sm md:text-[15px]">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse [animation-delay:-200ms]" />
+                          <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse [animation-delay:-100ms]" />
+                          <span className="inline-block size-2 rounded-full bg-slate-300 animate-pulse" />
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ) : null}
               </div>
             </div>
 
-            <div className="bg-transparent">
-              <div className="mx-auto w-full max-w-4xl px-4 py-4 md:px-8">
+            <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white/80 p-4 backdrop-blur-md">
+              <div className="mx-auto w-full max-w-4xl">
                 <div className="pb-2 text-xs text-slate-500">
                   {isTyping ? (
                     <span className="inline-flex items-center gap-2">
@@ -511,7 +547,7 @@ function App() {
                         }}
                         rows={1}
                         placeholder="Message Erin…"
-                        className="max-h-36 w-full resize-none overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/15 disabled:bg-slate-50"
+                        className="max-h-36 w-full resize-none overflow-hidden rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-inner outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500 disabled:bg-slate-50"
                         disabled={isTyping}
                       />
                     </div>
