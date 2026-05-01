@@ -1,6 +1,6 @@
 # 🏥 Erin AI | Multi-Agent Healthcare Command Center
 
-**Live Demo:** [https://erin-assistant.vercel.app/]
+**Live Demo:** https://erin-assistant.vercel.app/
 
 Erin AI is a high-performance, full-stack application designed to streamline hospital operations. Originally built for the Google Cloud Gen AI Academy APAC 2026, it serves as a central hub for managing patients, scheduling appointments, and interacting with specialized AI agents to optimize clinical workflows.
 
