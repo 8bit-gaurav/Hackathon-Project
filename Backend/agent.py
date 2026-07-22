@@ -8,12 +8,15 @@ from google.genai import types
 from toolbox_core import ToolboxSyncClient
 
 # 1. SETUP TOOLBOX
+from toolbox_core import ToolboxSyncClient
+import time
+
 toolbox = ToolboxSyncClient("https://toolbox-1044772433239.us-central1.run.app/")
 
 print("Loading hospital_toolset...")
 tools_list = None
 
-# Increased to 5 attempts with a 15-second wait
+# 5 attempts with a 15-second wait for the cold start
 for attempt in range(5):
     try:
         tools_list = toolbox.load_toolset("hospital_toolset")
@@ -22,7 +25,7 @@ for attempt in range(5):
             break
     except Exception as e:
         print(f"Toolbox load failed (Attempt {attempt + 1}/5). Waiting for server to wake up...")
-        time.sleep(15) # Wait 15 seconds before retrying
+        time.sleep(15)
 
 if not tools_list:
     raise RuntimeError("CRITICAL: Could not load hospital_toolset. Check the toolbox server.")
