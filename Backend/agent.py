@@ -1,3 +1,4 @@
+import traceback
 import time
 import json
 import os
@@ -9,7 +10,7 @@ from toolbox_core import ToolboxSyncClient
 # 1. SETUP TOOLBOX
 # toolbox = ToolboxSyncClient("http://127.0.0.1:5000")
 toolbox = ToolboxSyncClient("https://toolbox-1044772433239.us-central1.run.app/")
-tools_list = toolbox.load_toolset("hospital_toolset")
+tools_list = None
 tools = {t._name: t for t in tools_list}
 
 # 2. CONFIGURE RETRY LOGIC (Modified for better exhaustion handling)
@@ -394,6 +395,22 @@ async def process_request(user_input, history):
 
 if __name__ == "__main__":
     import uvicorn
+    async def get_tools():
+    global tools_list
+    if tools_list is None:
+        try:
+            tools_list = toolbox.load_toolset("hospital_toolset")
+        except Exception as e:
+            print(f"Failed to load toolset: {e}")
+            return None
+    return tools_list
+
+async def process_request(user_input):
+    # Load tools ONLY when a request actually comes in
+    current_tools = await get_tools()
+    
+    if not current_tools:
+        return "⚠️ The hospital database is currently offline for maintenance. I cannot book appointments at this time."
 
     port = int(os.getenv("PORT", "8000"))
     uvicorn.run("main:app", host="0.0.0.0", port=port)
