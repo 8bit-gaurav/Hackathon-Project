@@ -8,11 +8,23 @@ from google.genai import types
 from toolbox_core import ToolboxSyncClient
 
 # 1. SETUP TOOLBOX
-# toolbox = ToolboxSyncClient("http://127.0.0.1:5000")
 toolbox = ToolboxSyncClient("https://toolbox-1044772433239.us-central1.run.app/")
-tools_list = None
-tools = {t._name: t for t in tools_list}
 
+print("Loading hospital_toolset...")
+tools_list = None
+for attempt in range(3):
+    try:
+        tools_list = toolbox.load_toolset("hospital_toolset")
+        if tools_list:
+            break
+    except Exception as e:
+        print(f"Toolbox load failed (Attempt {attempt + 1}/3): {e}")
+        time.sleep(3) # Wait 3 seconds before retrying
+
+if not tools_list:
+    raise RuntimeError("CRITICAL: Could not load hospital_toolset. Check the toolbox server.")
+
+tools = {t._name: t for t in tools_list}
 # 2. CONFIGURE RETRY LOGIC (Modified for better exhaustion handling)
 retry_config = types.GenerateContentConfig(
     http_options=types.HttpOptions(
@@ -395,22 +407,7 @@ async def process_request(user_input, history):
 
 if __name__ == "__main__":
     import uvicorn
-    async def get_tools():
-    global tools_list
-    if tools_list is None:
-        try:
-            tools_list = toolbox.load_toolset("hospital_toolset")
-        except Exception as e:
-            print(f"Failed to load toolset: {e}")
-            return None
-    return tools_list
-
-async def process_request(user_input):
-    # Load tools ONLY when a request actually comes in
-    current_tools = await get_tools()
+    import os
     
-    if not current_tools:
-        return "⚠️ The hospital database is currently offline for maintenance. I cannot book appointments at this time."
-
     port = int(os.getenv("PORT", "8000"))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    uvicorn.run("main:app", host="0.0.0.0", port=port)t)
