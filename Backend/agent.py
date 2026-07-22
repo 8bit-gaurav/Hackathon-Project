@@ -12,14 +12,17 @@ toolbox = ToolboxSyncClient("https://toolbox-1044772433239.us-central1.run.app/"
 
 print("Loading hospital_toolset...")
 tools_list = None
-for attempt in range(3):
+
+# Increased to 5 attempts with a 15-second wait
+for attempt in range(5):
     try:
         tools_list = toolbox.load_toolset("hospital_toolset")
         if tools_list:
+            print("Successfully loaded hospital_toolset!")
             break
     except Exception as e:
-        print(f"Toolbox load failed (Attempt {attempt + 1}/3): {e}")
-        time.sleep(3) # Wait 3 seconds before retrying
+        print(f"Toolbox load failed (Attempt {attempt + 1}/5). Waiting for server to wake up...")
+        time.sleep(15) # Wait 15 seconds before retrying
 
 if not tools_list:
     raise RuntimeError("CRITICAL: Could not load hospital_toolset. Check the toolbox server.")
